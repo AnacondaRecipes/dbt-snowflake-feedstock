@@ -16,7 +16,8 @@ source:
 build:
   script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vv
   number: 0
-  skip: true  # [py<38]
+  # Skip s390x because we don't have agate on s390x.
+  skip: true  # [py<38 or s390x]
 
 requirements:
   host:
@@ -25,10 +26,10 @@ requirements:
     - wheel
     - setuptools
   run:
-    # via Grayskull
     - python
     - dbt-core >=1.7.0,<1.8.dev0
     - snowflake-connector-python >=3.0,<4.dev0
+    # installed via dbt-core but referenced directly; don't pin to avoid version conflicts with dbt-core
     - agate
 
 test:
