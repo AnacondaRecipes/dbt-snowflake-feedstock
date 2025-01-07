@@ -1,59 +1,155 @@
 {% set name = "dbt-snowflake" %}
-{% set version = "1.7.0" %}
+{% set version = "1.8.4" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  - url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dbt-snowflake-{{ version }}.tar.gz
-    sha256: 959943cdb0bcedc67203f0205a9ae21fba13f4c95ddf7089848a77b8c8a8d5f1
-
-  - url: https://github.com/dbt-labs/dbt-snowflake/archive/refs/tags/v{{ version }}.zip
-    sha256: 01e450dd7b6737a96e40d50bca25aa02ea2f69f6f274b43f7c80ea7cccb737dc
-    folder: dbt-snowflake-git
+  url: https://github.com/dbt-labs/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 80f4f6ab5b8f40a36cbf30b295df4fb68786624db88b875f56d8b8c813664ae1
 
 build:
-  script: {{ PYTHON }} -m pip install . --no-deps --no-build-isolation --ignore-installed --no-cache-dir -vv
   number: 0
-  # Skip s390x because we don't have agate on s390x.
-  skip: true  # [py<38 or s390x]
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  skip: True  # [py<39 or py>311]
+  skip: True  # [s390x]
 
 requirements:
   host:
-    - pip
     - python
-    - wheel
+    - pip
     - setuptools
+    - wheel
   run:
     - python
-    - dbt-core >=1.7.0,<1.8.dev0
-    - snowflake-connector-python >=3.0,<4.dev0
-    # installed via dbt-core but referenced directly; don't pin to avoid version conflicts with dbt-core
+    - dbt-common >=1.0.4,<2.0
+    - dbt-adapters >=1.1.1,<2.0
+    - snowflake-connector-python >=3.0,<4.0dev0
+    - dbt-core >=1.8.0
     - agate
+
+# error_msg = "[SQLQueryStatus]: Unable to parse logging event dictionary. Failed to parse query_id field: expected string or bytes-...sed': 0.0006610419999999451, 'node_info': {}, 'query_id': <MagicMock name='connect().cursor().sfqid' id='4407940576'>}"
+{% set deselect_unit_tests = " --deselect=tests/unit/test_snowflake_adapter.py::TestSnowflakeAdapter::test_pre_post_hooks_warehouse" %}
+{% set deselect_unit_tests = deselect_unit_tests + " --deselect=tests/unit/test_snowflake_adapter.py::TestSnowflakeAdapter::test_quoting_on_drop" %}
+{% set deselect_unit_tests = deselect_unit_tests + " --deselect=tests/unit/test_snowflake_adapter.py::TestSnowflakeAdapter::test_quoting_on_drop_schema" %}
+{% set deselect_unit_tests = deselect_unit_tests + " --deselect=tests/unit/test_snowflake_adapter.py::TestSnowflakeAdapter::test_quoting_on_rename" %}
+{% set deselect_unit_tests = deselect_unit_tests + " --deselect=tests/unit/test_snowflake_adapter.py::TestSnowflakeAdapter::test_quoting_on_truncate" %}
+
+# ModuleNotFoundError: No module named 'dbt.tests.adapter'
+# Missing https://github.com/dbt-labs/dbt-tests-adapter
+{% set ignore_tests = " --ignore=tests/functional/adapter/test_aliases.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_aliases.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_basic.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_caching.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_changing_relation_type.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_concurrency.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_constraints.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_ephemeral.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_grants.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_persist_docs.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_python_model.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_simple_snapshot.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/test_timestamps.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/column_types/test_column_types.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/dbt_clone/test_dbt_clone.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/dbt_show/test_dbt_show.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/empty/test_empty.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/incremental/test_incremental_merge_exclude_columns.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/incremental/test_incremental_on_schema_change.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/incremental/test_incremental_predicates.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/incremental/test_incremental_run_result.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/incremental/test_incremental_unique_id.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/list_relations_tests/test_pagination.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/list_relations_tests/test_show_objects.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/query_comment_tests/test_query_comments.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/simple_copy/test_simple_copy.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/simple_seed/test_simple_seed.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/simple_seed/test_simple_seed_override.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/store_test_failures_tests/test_store_test_failures.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/unit_testing/test_unit_testing.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/utils/test_data_types.py" %}
+{% set ignore_tests = ignore_tests + " --ignore=tests/functional/adapter/utils/test_utils.py" %}
+
+# Need to setup working database and setup credentials like in tox.ini (https://github.com/dbt-labs/dbt-snowflake/blob/v1.8.4/tox.ini#L19) and gha workflow (https://github.com/dbt-labs/dbt-snowflake/blob/v1.8.4/.github/workflows/integration.yml#L173)
+# raise DbtProfileError('Credentials in profile "{}", target "{}" invalid: {}'.format(profile_name, target_name, msg)) from e
+#   dbt.exceptions.DbtProfileError: Runtime Error
+# Credentials in profile "test", target "default" invalid: None is not of type 'string'
+{% set deselect_integration_tests = " --deselect=tests/functional/adapter/test_aliases.py" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/test_aliases.py" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/test_isolated_begin_commit.py::TestModelWarehouse::test_isolated_begin_commit" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/test_anonymous_usage_stats.py::TestAnonymousUsageStatsOn::test_stats_get_sent" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/test_anonymous_usage_stats.py::TestAnonymousUsageStatsOff::test_stats_do_not_get_sent" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/test_get_last_relation_modified.py::TestGetLastRelationModified::test_get_last_relation_modified" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/test_get_last_relation_modified.py::TestGetLastRelationModifiedBatch::test_get_last_relation_modified_batch" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/catalog_tests/test_relation_types.py::TestCatalogRelationTypes::test_relation_types_populate_correctly" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/catalog_tests/test_relation_types.py::TestCatalogRelationTypes::test_relation_types_populate_correctly" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/catalog_tests/test_relation_types.py::TestCatalogRelationTypes::test_relation_types_populate_correctly" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/catalog_tests/test_relation_types.py::TestCatalogRelationTypes::test_relation_types_populate_correctly" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/custom_schema_tests/test_custom_database.py::TestOverrideDatabase::test_snowflake_override_generate_db_name" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/custom_schema_tests/test_custom_schema.py::TestCustomProjectSchemaWithPrefix::test__snowflake__custom_schema_with_prefix" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_basic.py::TestSnowflakeDynamicTableBasic::test_dynamic_table_create" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_basic.py::TestSnowflakeDynamicTableBasic::test_dynamic_table_create_idempotent" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_basic.py::TestSnowflakeDynamicTableBasic::test_dynamic_table_full_refresh" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_basic.py::TestSnowflakeDynamicTableBasic::test_dynamic_table_replaces_table" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_basic.py::TestSnowflakeDynamicTableBasic::test_dynamic_table_replaces_view" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_basic.py::TestSnowflakeDynamicTableBasic::test_table_replaces_dynamic_table" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_basic.py::TestSnowflakeDynamicTableBasic::test_view_replaces_dynamic_table" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_basic.py::TestSnowflakeDynamicTableBasic::test_dynamic_table_only_updates_after_refresh" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesApply::test_full_refresh_occurs_with_changes" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesApply::test_change_is_applied_via_alter" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesApply::test_change_is_applied_via_alter_downstream" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesContinue::test_full_refresh_occurs_with_changes" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesContinue::test_change_is_not_applied_via_alter" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesContinue::test_change_is_not_applied_via_replace" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesFailMixin::test_full_refresh_occurs_with_changes" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesFailMixin::test_change_is_not_applied_via_alter" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/dynamic_table_tests/test_dynamic_tables_changes.py::TestSnowflakeDynamicTableChangesFailMixin::test_change_is_not_applied_via_replace" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/list_relations_tests/test_special_characters.py::TestSpecialCharactersInSchema::test_schema_with_special_chars" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/python_model_tests/test_table_type.py::TestTableType::test_expected_table_types_are_created" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/adapter/statement_test/test_statements.py::TestStatements::test_snowflake_statements" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/oauth/test_oauth.py::TestSnowflakeOauth::test_snowflake_basic" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/override_database/test_override_database.py::TestModelOverrideSnowflake::test_snowflake_database_override" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/override_database/test_override_database.py::TestProjectSeedOverrideSnowflake::test_snowflake_database_override" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/override_database/test_override_database.py::TestProjectModelOverrideSnowflake::test_snowflake_database_override" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/query_tag/test_query_tags.py::TestQueryTag::test_snowflake_query_tag" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/query_tag/test_query_tags.py::TestSnowflakeProfileQueryTag::test_snowflake_query_tag" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/redact_log_values/test_duplicate_key_not_in_exceptions.py::TestDuplicateKeyNotInExceptions::test_row_values_were_scrubbed_from_duplicate_merge_exception" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/redact_log_values/test_row_values_not_in_exceptions.py::TestRowValuesNotInExceptions::test_row_values_were_scrubbed_from_duplicate_merge_exception" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/snowflake_view_dependency/test_snowflake_view_dependency.py::TestSnowflakeLateBindingViewDependency::test__snowflake__changed_table_schema_for_downstream_view" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/snowflake_view_dependency/test_snowflake_view_dependency.py::TestSnowflakeLateBindingViewDependency::test__snowflake__changed_table_schema_for_downstream_view_changed_to_table" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/warehouse_test/test_warehouses.py::TestModelWarehouse::test_snowflake_override_ok" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/warehouse_test/test_warehouses.py::TestModelWarehouse::test_snowflake_override_noexist" %}
+{% set deselect_integration_tests = deselect_integration_tests + " --deselect=tests/functional/warehouse_test/test_warehouses.py::TestConfigWarehouse::test_snowflake_override_ok" %}
 
 test:
   source_files:
-    - dbt-snowflake-git/tests
+    - tests
+    - pytest.ini
+    - test.env.example
   imports:
     - dbt.adapters.snowflake
   commands:
-    # Skip pip check because dbt-core depends on protobuf 4 but we modified the dep to use 3 instead.
-    # - pip check
-    - pytest -v dbt-snowflake-git/tests/unit
+    - pip check
+    # Unit tests
+    - cp test.env.example test.env
+    - pytest -vvv {{ deselect_unit_tests }} tests/unit
+    # integration tests
+    - pytest -vvv {{ ignore_tests }} {{ deselect_integration_tests }} tests/functional
   requires:
     - pip
     - pytest
 
 about:
   home: https://github.com/dbt-labs/dbt-snowflake
-  summary: The Snowflake adapter plugin for dbt.
-  description: dbt-snowflake contains all of the code enabling dbt to work with Snowflake.
+  summary: The Snowflake adapter plugin for dbt
+  description: The dbt-snowflake package contains all of the code enabling dbt to work with Snowflake.
   license: Apache-2.0
-  license_family: Apache
   license_file: LICENSE.md
+  license_family: Apache
   dev_url: https://github.com/dbt-labs/dbt-snowflake
   doc_url: https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup
+  
 
 extra:
   recipe-maintainers:
