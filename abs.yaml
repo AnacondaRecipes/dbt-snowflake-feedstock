@@ -1,7 +1,2 @@
 upload_channels:
   - sfe1ed40
-
-channels:
-  - https://staging.continuum.io/prefect/fs/dbt-adapters-feedstock/pr1/9f7e782
-  - https://staging.continuum.io/prefect/fs/dbt-feedstock/pr4/181346b
-  - https://staging.continuum.io/prefect/fs/daff-feedstock/pr1/9109cb6
