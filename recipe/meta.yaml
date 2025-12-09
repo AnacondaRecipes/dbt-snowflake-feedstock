@@ -31,9 +31,6 @@ requirements:
     # installed via dbt-core but referenced directly; don't pin to avoid version conflicts with dbt-core
     - agate
 
-# Tests not adapted for py313
-# >   raise AttributeError(item)
-# E   AttributeError: __class_getitem__
 test:
   source_files:
     - tests
@@ -45,6 +42,9 @@ test:
     - pip check
     - cp test.env.example test.env  # [unix]
     - copy test.env.example test.env  # [win]
+    # Tests not adapted for py313
+    # >   raise AttributeError(item)
+    # E   AttributeError: __class_getitem__
     - pytest -v tests/unit  # [py<313]
   requires:
     - pip
