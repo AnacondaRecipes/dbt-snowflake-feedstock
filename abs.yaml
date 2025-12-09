@@ -1,2 +1,5 @@
 upload_channels:
   - sfe1ed40
+
+channels:
+  - https://staging.continuum.io/pbp/fs/dbt-adapters-feedstock/pr5/4cfbd8f
