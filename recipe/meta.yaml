@@ -12,7 +12,8 @@ source:
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  skip: true  # [py<310]
+  # No certifi <2025.4.26 for Python 3.14+
+  skip: true  # [py<310 or py>313]
 
 requirements:
   host:
