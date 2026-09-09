@@ -10,10 +10,9 @@ source:
   sha256: d384c2eb7ccb5dc91f9c1e89a8041b9121ab8605f580a2e90f806e6ef013d05e
 
 build:
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  # No certifi <2025.4.26 for Python 3.14+
-  skip: true  # [py<310 or py>313]
+  skip: true  # [py<310]
 
 requirements:
   host:
