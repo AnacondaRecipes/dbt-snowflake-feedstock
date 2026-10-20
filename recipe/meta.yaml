@@ -1,5 +1,5 @@
 {% set name = "dbt-snowflake" %}
-{% set version = "1.12.0" %}
+{% set version = "1.12.3" %}
 
 package:
   name: {{ name }}
@@ -7,10 +7,10 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_') }}-{{ version }}.tar.gz
-  sha256: d384c2eb7ccb5dc91f9c1e89a8041b9121ab8605f580a2e90f806e6ef013d05e
+  sha256: f13a4e7a43bf7279805a9c4280c4ae0573b91e7d3ec1fd031a5c51cb7430df4a
 
 build:
-  number: 1
+  number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   skip: true  # [py<310]
 
@@ -33,6 +33,7 @@ requirements:
     - dbt-core >=1.10.0,<2.0
     # installed via dbt-core but referenced directly; don't pin to avoid version conflicts with dbt-core
     - agate
+    - pyopenssl >=24.0.0
 
 test:
   source_files:
@@ -52,6 +53,8 @@ test:
   requires:
     - pip
     - pytest
+    # Required to generate legacy-encrypted private key test fixtures
+    - pycryptodome >=3.19.1,<4.0
 
 about:
   home: https://github.com/dbt-labs/dbt-snowflake
@@ -60,7 +63,7 @@ about:
   license: Apache-2.0
   license_file: LICENSE
   license_family: Apache
-  dev_url: https://github.com/dbt-labs/dbt-snowflake
+  dev_url: https://github.com/dbt-labs/dbt-adapters/tree/main/dbt-snowflake
   doc_url: https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup
 
 extra:
